@@ -20,6 +20,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import { flow, get, invokeArgs, constant } from "lodash/fp";
+
 import type { Status } from "@/types/articles";
 
 export interface ValueChangeEvent extends CustomEvent {
@@ -62,12 +64,12 @@ onBeforeUnmount(() => {
   );
 });
 
-function resetSelect() {
-  const clearBtn = selectRef.value?.querySelector(
-    "span[data-te-select-clear-btn-ref]"
-  );
-  clearBtn?.dispatchEvent(new Event("click"));
-}
+const resetSelect = flow(
+  constant(selectRef),
+  get("value"),
+  invokeArgs("querySelector", ["span[data-te-select-clear-btn-ref]"]),
+  invokeArgs("dispatchEvent", [new Event("click")])
+);
 
 defineExpose({
   resetSelect,
