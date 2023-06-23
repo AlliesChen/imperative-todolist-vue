@@ -1,18 +1,42 @@
 <template>
   <tw-article>
     <template #header>
-      <h4>{{ props.header }}</h4>
-      <div class="absolute -translate-y-1 right-2 flex justify-center gap-2">
-        <tw-button class="p-1" rounded-full context="danger" @click="removeTodo">
-          <TrashIcon class="w-4 h-4" />
-        </tw-button>
-        <tw-button class="p-1" rounded-full context="success" @click="checkTodo">
-          <ChceckIcon class="w-4 h-4" />
-        </tw-button>
+      <h4 class="absolute">{{ props.header }}</h4>
+      <div class="w-full relative flex justify-between">
+        <div>
+          <tw-button
+            class="p-1"
+            rounded-full
+            context="danger"
+            @click="updateTodo"
+          >
+            <TrashIcon class="w-4 h-4 pointer-events-none" />
+          </tw-button>
+        </div>
+        <div class="flex gap-2">
+          <tw-button
+            class="p-1"
+            rounded-full
+            context="success"
+            @click="updateTodo"
+          >
+            <ChceckIcon class="w-4 h-4 pointer-events-none" />
+          </tw-button>
+          <tw-button
+            class="p-1"
+            rounded-full
+            context="warning"
+            @click="updateTodo"
+          >
+            <PencilIcon class="w-4 h-4 pointer-events-none" />
+          </tw-button>
+        </div>
       </div>
     </template>
     <template #main>
-      <h5 class="mb-2 text-xl font-medium leading-tight text-neutral-800 dark:text-neutral-50">
+      <h5
+        class="mb-2 text-xl font-medium leading-tight text-neutral-800 dark:text-neutral-50"
+      >
         {{ props.main?.title }}
       </h5>
       <p class="mb-4 text-base text-neutral-600 dark:text-neutral-200">
@@ -30,31 +54,53 @@ import TwArticle from "./TwArticle.vue";
 import TwButton from "./TwButton.vue";
 import TrashIcon from "../assets/icons/TrashIcon.vue";
 import ChceckIcon from "../assets/icons/CheckIcon.vue";
+import PencilIcon from "../assets/icons/PencilIcon.vue";
+import type { Article } from "@/types/Articles";
+import type { ClickEventType } from "./TwButton.vue";
+import { cond, eq, flow, get, stubTrue, tap } from "lodash/fp";
 
 export interface Props {
-  todoNo: string | number;
-  header: string;
-  main: {
-    title: string;
-    content: string;
-  };
-  footer: string;
+  todoNo: Article["id"];
+  mode: Article["mode"];
+  header: Article["header"];
+  main: Article["main"];
+  footer: Article["footer"];
+}
+export interface UpdateEvent {
+  action: "check" | "edit" | "remove";
+  props: Props;
 }
 
 const props = defineProps<Props>();
 
 const emits = defineEmits<{
-  (e: "check", value: Props): void;
-  (e: "remove", value: Props): void;
+  (e: "update", value: UpdateEvent): void;
 }>();
 
-function checkTodo() {
-  emits("check", props);
-}
-
-function removeTodo() {
-  emits("remove", props);
-}
+const updateTodo = flow(
+  get("context"),
+  tap((value) => console.log(value)),
+  cond<ClickEventType["context"], void>([
+    [
+      eq("success"),
+      () => emits("update", { action: "check", props: { ...props } }),
+    ],
+    [
+      eq("warning"),
+      () => emits("update", { action: "edit", props: { ...props } }),
+    ],
+    [
+      eq("danger"),
+      () => emits("update", { action: "remove", props: { ...props } }),
+    ],
+    [
+      stubTrue,
+      () => {
+        throw Error("Unexpected click event type context");
+      },
+    ],
+  ])
+);
 </script>
 
 <style scoped></style>

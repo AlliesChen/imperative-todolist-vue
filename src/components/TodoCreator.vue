@@ -47,7 +47,7 @@ import PlusIcon from "../assets/icons/PlusIcon.vue";
 import XMarkIcon from "../assets/icons/XMarkIcon.vue";
 import TwSelector from "../components/TwSelector.vue";
 
-import type { Article, Todo, Status } from "../types/articles";
+import type { Article, Todo, Status } from "../types/Articles";
 
 interface TodoStatusOption {
   id: string;
@@ -83,9 +83,10 @@ function updateStatus(status: Status) {
 function setArticles(e: Event) {
   const formData = new FormData(e.target as HTMLFormElement);
   const todo = Object.fromEntries(formData) as unknown as Todo;
-  console.log(todo);
+
   const article: Article = {
     id: nanoid(),
+    mode: "VIEW",
     header: selectedValue.value,
     main: { ...todo },
     footer: new Date().toUTCString(),

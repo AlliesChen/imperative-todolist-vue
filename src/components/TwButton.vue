@@ -1,7 +1,10 @@
 <template>
-  <button :type="props.type"
-    class="inline-block rounded text-xs font-medium uppercase leading-normal text-white transition duration-150 ease-in-out focus:outline-none focus:ring-0"
-    :class="[{ 'rounded-full': props.roundedFull }, styleContext]">
+  <button
+    :type="props.type"
+    class="w-min h-min rounded text-xs font-medium uppercase leading-normal text-white transition duration-150 ease-in-out focus:outline-none focus:ring-0"
+    :class="[{ 'rounded-full': props.roundedFull }, styleContext]"
+    @click="emitContext"
+  >
     <slot>button</slot>
   </button>
 </template>
@@ -15,13 +18,23 @@ export interface Props {
   roundedFull?: boolean;
   context?: "success" | "danger" | "warning" | "info";
 }
+
+export interface ClickEventType {
+  context: Props["context"];
+  event: MouseEvent;
+}
+
 const props = withDefaults(defineProps<Props>(), {
   type: "button",
   roundedFull: false,
   context: undefined,
 });
 
-const styleMatcher = cond<Props['context'], string>([
+const emits = defineEmits<{
+  (e: "click", value: ClickEventType): void;
+}>();
+
+const styleMatcher = cond<Props["context"], string>([
   [
     eq("success"),
     constant(
@@ -54,6 +67,10 @@ const styleMatcher = cond<Props['context'], string>([
   ],
 ]);
 const styleContext = computed(() => styleMatcher(props.context));
+
+function emitContext(event: MouseEvent): void {
+  emits("click", { context: props.context, event });
+}
 </script>
 
 <style scoped></style>
