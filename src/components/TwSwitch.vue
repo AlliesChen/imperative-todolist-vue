@@ -26,7 +26,7 @@ const emits = defineEmits<{
   (e: "switch", value: boolean);
 }>();
 
-function onStatusChage(event: InputEvent) {
+function onStatusChage(event: Event) {
   emits("switch", (event.target as HTMLInputElement).checked);
 }
 </script>

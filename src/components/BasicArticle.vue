@@ -1,8 +1,10 @@
 <template>
   <tw-article>
     <template #header>
-      <h4 class="absolute">{{ props.header }}</h4>
-      <div class="w-full relative flex justify-between">
+      <h4 class="absolute">
+        {{ props.header }}
+      </h4>
+      <div class="w-full flex justify-between">
         <div>
           <tw-button
             class="p-1"
@@ -15,6 +17,7 @@
         </div>
         <div class="flex gap-2">
           <tw-button
+            v-show="props.header !== 'COMPLETE'"
             class="p-1"
             rounded-full
             context="success"
@@ -50,14 +53,16 @@
 </template>
 
 <script setup lang="ts">
+import type { Article } from "@/types/Articles.type";
+import type { ClickEventType } from "./TwButton.vue";
+
+import { cond, eq, flow, get, stubTrue, tap } from "lodash/fp";
+// component
 import TwArticle from "./TwArticle.vue";
 import TwButton from "./TwButton.vue";
 import TrashIcon from "../assets/icons/TrashIcon.vue";
 import ChceckIcon from "../assets/icons/CheckIcon.vue";
 import PencilIcon from "../assets/icons/PencilIcon.vue";
-import type { Article } from "@/types/Articles";
-import type { ClickEventType } from "./TwButton.vue";
-import { cond, eq, flow, get, stubTrue, tap } from "lodash/fp";
 
 export interface Props {
   todoNo: Article["id"];
