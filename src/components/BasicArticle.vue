@@ -56,7 +56,7 @@
 import type { Article } from "@/types/Articles.type";
 import type { ClickEventType } from "./TwButton.vue";
 
-import { cond, eq, flow, get, stubTrue, tap } from "lodash/fp";
+import { cond, constant, eq, flow, get, stubTrue, tap } from "lodash/fp";
 // component
 import TwArticle from "./TwArticle.vue";
 import TwButton from "./TwButton.vue";
@@ -85,26 +85,18 @@ const emits = defineEmits<{
 const updateTodo = flow(
   get("context"),
   tap((value) => console.log(value)),
-  cond<ClickEventType["context"], void>([
-    [
-      eq("success"),
-      () => emits("update", { action: "check", props: { ...props } }),
-    ],
-    [
-      eq("warning"),
-      () => emits("update", { action: "edit", props: { ...props } }),
-    ],
-    [
-      eq("danger"),
-      () => emits("update", { action: "remove", props: { ...props } }),
-    ],
+  cond<ClickEventType["context"], UpdateEvent["action"]>([
+    [eq("success"), constant("check")],
+    [eq("warning"), constant("edit")],
+    [eq("danger"), constant("remove")],
     [
       stubTrue,
       () => {
         throw Error("Unexpected click event type context");
       },
     ],
-  ])
+  ]),
+  (action) => emits("update", { action, props: { ...props } })
 );
 </script>
 
