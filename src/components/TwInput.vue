@@ -1,11 +1,11 @@
 <template>
   <div class="relative mb-3" data-te-input-wrapper-init>
-    <textarea v-if="props.type === 'textarea'" :id="props.id" :name="props.name"
+    <textarea v-if="props.type === 'textarea'"
       class="peer block min-h-[auto] w-full rounded border-0 bg-transparent py-[0.32rem] px-3 leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-      :placeholder="props.placeholder" rows="4" />
-    <input v-else :type="props.type" :id="props.id" :name="props.name"
+      rows="4" :id="props.id" :name="props.name" :placeholder="props.placeholder" :value="props.default" />
+    <input v-if="props.type === 'text'"
       class="peer block min-h-[auto] w-full rounded border-0 bg-transparent py-[0.32rem] px-3 leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-      :placeholder="props.placeholder" />
+      :type="props.type" :id="props.id" :name="props.name" :placeholder="props.placeholder" :value="props.default" />
     <label :for="props.id"
       class="pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-neutral-200">
       {{ props.label }}
@@ -14,21 +14,22 @@
 </template>
 
 <script setup lang="ts">
-import { nanoid } from 'nanoid';
+import { nanoid } from "nanoid";
 
 interface Props {
   id?: string;
   label?: string;
   name?: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'textarea';
+  type?: "text" | "email" | "password" | "number" | "tel" | "url" | "textarea";
   placeholder?: string;
-
+  default?: string;
 }
 const props = withDefaults(defineProps<Props>(), {
   id: () => nanoid(),
-  label: 'Text input',
+  label: "Text input",
   name: undefined,
-  type: 'text',
-  placeholder: 'Example label',
-})
+  type: "text",
+  placeholder: "Example label",
+  default: "",
+});
 </script>

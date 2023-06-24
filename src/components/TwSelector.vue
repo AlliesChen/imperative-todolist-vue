@@ -4,6 +4,7 @@
       data-te-select-init
       :data-te-select-placeholder="props.placeholder"
       data-te-select-clear-button="true"
+      :value="props.default"
     >
       <option value="" hidden seleted />
       <option
@@ -22,13 +23,14 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { flow, get, invokeArgs, constant } from "lodash/fp";
 
-import type { Status } from "@/types/articles";
+import type { Status } from "@/types/Articles.type";
 
 export interface ValueChangeEvent extends CustomEvent {
   value: Status;
 }
 
 export interface Props {
+  default?: unknown;
   placeholder?: "Placeholder";
   options?: Array<{
     id: string | number;
@@ -54,6 +56,8 @@ const updateSelectValue = (e: Event) =>
   emits("valueChange", (e as ValueChangeEvent).value);
 
 onMounted(() => {
+  if (props.default) {
+  }
   selectRef.value?.addEventListener("valueChange.te.select", updateSelectValue);
 });
 

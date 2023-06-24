@@ -3,12 +3,7 @@
     <template #header>
       <div class="flex flex-col gap-2">
         <h4 class="text-left">Create a new card:</h4>
-        <tw-selector
-          ref="selectRef"
-          :options="todoStatusOptions"
-          label="Status"
-          @value-change="updateStatus"
-        />
+        <task-status ref="selectRef" @update="updateStatus" />
       </div>
     </template>
     <template #main>
@@ -37,6 +32,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Article, Todo, Status } from "../types/Articles.type";
+
 import { ref } from "vue";
 import { nanoid } from "nanoid";
 
@@ -46,38 +43,26 @@ import TwArticle from "../components/TwArticle.vue";
 import PlusIcon from "../assets/icons/PlusIcon.vue";
 import XMarkIcon from "../assets/icons/XMarkIcon.vue";
 import TwSelector from "../components/TwSelector.vue";
-
-import type { Article, Todo, Status } from "../types/articles";
-
-interface TodoStatusOption {
-  id: string;
-  label: string;
-  value: Status;
-}
+import TaskStatus from "../components/TaskStatus.vue";
 
 const emits = defineEmits<{
   (e: "submit", value: Article): void;
 }>();
-
-const todoStatusOptions: Array<TodoStatusOption> = [
-  { id: nanoid(), label: "To do", value: "TODO" },
-  { id: nanoid(), label: "Completed", value: "COMPLETED" },
-  { id: nanoid(), label: "Deleted", value: "DELETED" },
-];
 const formRef = ref<HTMLFormElement>();
 const selectRef = ref<typeof TwSelector>();
 const selectedValue = ref();
+
+function updateStatus(status: Status) {
+  selectedValue.value = status;
+}
+
 function resetTodo() {
   formRef.value?.reset();
-  selectRef.value?.resetSelect();
+  selectRef.value?.selectRef.resetSelect();
 }
 
 function addTodo() {
   formRef.value?.requestSubmit();
-}
-
-function updateStatus(status: Status) {
-  selectedValue.value = status;
 }
 
 function setArticles(e: Event) {
@@ -86,6 +71,7 @@ function setArticles(e: Event) {
   console.log(todo);
   const article: Article = {
     id: nanoid(),
+    mode: "VIEW",
     header: selectedValue.value,
     main: { ...todo },
     footer: new Date().toUTCString(),
