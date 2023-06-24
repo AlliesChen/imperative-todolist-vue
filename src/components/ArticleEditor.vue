@@ -4,20 +4,30 @@
       <label class="flex justify-center items-center gap-1">
         <span class="text-sm dark:text-white">Status:</span>
         <select class="rounded text-black" @change="updateStatus">
-          <option v-for="option in useTodoStatusOptions()" :key="option.id">{{ option.value }}</option>
+          <option v-for="option in useTodoStatusOptions()" :key="option.id">
+            {{ option.value }}
+          </option>
         </select>
       </label>
     </template>
 
     <template #main>
-      <form ref="formRef" class="flex flex-col items-center gap-1" @submit.prevent="confirmEditing">
+      <form
+        ref="formRef"
+        class="flex flex-col items-center gap-1"
+        @submit.prevent="confirmEditing"
+      >
         <label class="flex flex-col items-start">
           <span class="text-xs dark:text-white">Title</span>
           <input class="px-1 rounded" :value="props.main.title" />
         </label>
         <label class="flex flex-col items-start">
           <span class="text-xs dark:text-white">Content</span>
-          <input class="px-1 rounded" type="textarea" :value="props.main.content" />
+          <input
+            class="px-1 rounded"
+            type="textarea"
+            :value="props.main.content"
+          />
         </label>
       </form>
     </template>
@@ -40,6 +50,8 @@ import type { Article } from "../types/Articles.type";
 import type { UpdateEvent as BasicUpdateEvent } from "./BasicArticle.vue";
 
 import { ref } from "vue";
+import { flow, get, invokeArgs } from "lodash/fp";
+// components
 import TwArticle from "./TwArticle.vue";
 import TwButton from "./TwButton.vue";
 import { useTodoStatusOptions } from "@/hooks/todoStatusOptions";
@@ -64,20 +76,16 @@ const emits = defineEmits<{
 const formRef = ref<HTMLFormElement>();
 const selectedValue = ref(props.header);
 
-function updateStatus(event: Event) {
-  const newStatus = (event.target as HTMLSelectElement).value;
-  selectedValue.value = newStatus;
-}
-function cancelEditing() {
-  emits("update", { action: "cancel", props: { ...props } });
-}
-function submitForm() {
-  formRef.value?.requestSubmit();
-}
-function confirmEditing(e: Event) {
-  const inputValues = (e.target as HTMLFormElement).querySelectorAll("input")
-  const [titleNode, contentNode] = Array.from(inputValues);
-  emits("update", {
+const updateStatus = flow(
+  get<Event, "target">("target"),
+  get<HTMLSelectElement, "value">("value"),
+  (newStatus: string) => (selectedValue.value = newStatus)
+);
+const confirmEditing = flow(
+  get<Event, "target">("target"),
+  invokeArgs("querySelectorAll", ["input"]),
+  (inputValues: NodeListOf<HTMLFormElement>) => Array.from(inputValues),
+  ([titleNode, contentNode]: Array<HTMLInputElement>) => ({
     action: "update",
     props: {
       todoNo: props.todoNo,
@@ -85,11 +93,18 @@ function confirmEditing(e: Event) {
       header: selectedValue.value,
       main: {
         title: titleNode.value,
-        content: contentNode.value
+        content: contentNode.value,
       },
       footer: new Date().toUTCString(),
     },
-  });
+  }),
+  (value: UpdateEvent) => emits("update", value)
+);
+function cancelEditing() {
+  emits("update", { action: "cancel", props: { ...props } });
+}
+function submitForm() {
+  formRef.value?.requestSubmit();
 }
 </script>
 

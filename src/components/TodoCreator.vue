@@ -36,6 +36,7 @@ import type { Article, Todo, Status } from "../types/Articles.type";
 
 import { ref } from "vue";
 import { nanoid } from "nanoid";
+import { flow, get } from "lodash/fp";
 
 import TwInput from "../components/TwInput.vue";
 import TwButton from "../components/TwButton.vue";
@@ -52,32 +53,31 @@ const formRef = ref<HTMLFormElement>();
 const selectRef = ref<typeof TwSelector>();
 const selectedValue = ref();
 
-function updateStatus(status: Status) {
-  selectedValue.value = status;
-}
-
-function resetTodo() {
+const resetTodo = () => {
   formRef.value?.reset();
   selectRef.value?.selectRef.resetSelect();
-}
-
-function addTodo() {
-  formRef.value?.requestSubmit();
-}
-
-function setArticles(e: Event) {
-  const formData = new FormData(e.target as HTMLFormElement);
-  const todo = Object.fromEntries(formData) as unknown as Todo;
-  console.log(todo);
-  const article: Article = {
+};
+const setArticles = flow(
+  get("target"),
+  (el: HTMLFormElement) => new FormData(el),
+  (formData) => Object.fromEntries(formData),
+  (todo: Todo) => ({
     id: nanoid(),
     mode: "VIEW",
     header: selectedValue.value,
     main: { ...todo },
     footer: new Date().toUTCString(),
-  };
-  emits("submit", article);
-  resetTodo();
+  }),
+  (article: Article) => emits("submit", article),
+  resetTodo
+);
+
+function updateStatus(status: Status) {
+  selectedValue.value = status;
+}
+
+function addTodo() {
+  formRef.value?.requestSubmit();
 }
 </script>
 
