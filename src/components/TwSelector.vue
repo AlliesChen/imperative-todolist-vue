@@ -4,13 +4,20 @@
       data-te-select-init
       :data-te-select-placeholder="props.placeholder"
       data-te-select-clear-button="true"
-      :value="props.default"
     >
-      <option value="" hidden seleted />
+      <option
+        v-if="!props.default"
+        label=""
+        value=""
+        hidden
+        :seleted="!props.default"
+      />
       <option
         v-for="option in props.options"
         :key="option.id"
+        :label="option.label"
         :value="option.value"
+        :selected="option.value === props.default"
       >
         {{ option.label }}
       </option>
