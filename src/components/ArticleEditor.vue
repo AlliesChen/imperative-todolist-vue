@@ -3,10 +3,14 @@
     <template #header>
       <label class="flex justify-center items-center gap-1">
         <span class="text-sm dark:text-white">Status:</span>
-        <select class="rounded text-black" @change="updateStatus">
-          <option v-for="option in useTodoStatusOptions()" :key="option.id">
-            {{ option.value }}
-          </option>
+        <select ref="selectElRef" class="rounded text-black">
+          <option
+            v-for="option in todoStatusOptions"
+            :key="option.id"
+            :value="option.value"
+            :selected="option.value === props.header"
+            :label="option.label"
+          />
         </select>
       </label>
     </template>
@@ -74,13 +78,9 @@ const emits = defineEmits<{
   (e: "update", value: UpdateEvent): void;
 }>();
 const formRef = ref<HTMLFormElement>();
-const selectedValue = ref(props.header);
+const selectElRef = ref<HTMLSelectElement>();
+const todoStatusOptions = useTodoStatusOptions();
 
-const updateStatus = flow(
-  get<Event, "target">("target"),
-  get<HTMLSelectElement, "value">("value"),
-  (newStatus: string) => (selectedValue.value = newStatus)
-);
 const confirmEditing = flow(
   get<Event, "target">("target"),
   invokeArgs("querySelectorAll", ["input"]),
@@ -90,7 +90,7 @@ const confirmEditing = flow(
     props: {
       todoNo: props.todoNo,
       mode: "VIEW",
-      header: selectedValue.value,
+      header: selectElRef.value.value,
       main: {
         title: titleNode.value,
         content: contentNode.value,
